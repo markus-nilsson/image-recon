@@ -1,9 +1,4 @@
-classdef data_obj_image_vector < data_obj
-
-    properties
-
-
-    end
+classdef do_w_image_vector < do_w
 
     properties (GetAccess = public, SetAccess = protected)
         h;
@@ -11,20 +6,20 @@ classdef data_obj_image_vector < data_obj
 
     methods
 
-        function O = data_obj_image_vector(w, h)
-            O = O@data_obj(w);
+        function O = do_w_image_vector(w, h)
+            O = O@do_w(w);
             O.h = h;            
         end
 
         function O_new = new(O, w)
             assert(prod(O.h.dim(2:4)) == size(w, 1), 'size error');
-            assert(prod(O.h.dim(5)) == size(w, 2), 'size error');
-            O_new = data_obj_image_vector(w, O.h);
+            O.h.dim(5) = size(w,2);
+            O_new = do_w_image_vector(w, O.h);
         end
 
-        function O = add(O, w, k)
-            if (my_isa(w, 'data_obj')), f = @(x) x.w; else f = @(x) x; end
-            O.w(:,k) = O.w(:,k) + f(w);
+        function O = add(O, w, l)
+            if (my_isa(w, 'do_w')), f = @(x) x.w; else, f = @(x) x; end
+            O.w(:,l) = O.w(:,l) + f(w);
         end
 
         function I = imreshape(O)
@@ -32,7 +27,7 @@ classdef data_obj_image_vector < data_obj
         end
 
         function O_new = zeros(O)
-            O_new = data_obj_image_vector(zeros(size(O.w)), O.h);
+            O_new = do_w_image_vector(zeros(size(O.w)), O.h);
         end       
 
     end
@@ -40,7 +35,7 @@ classdef data_obj_image_vector < data_obj
     methods (Static)
 
         % not ideal place for this
-        function data_obj = new_hr_from_lr(data_lr)
+        function do = new_hr_from_lr(data_lr)
 
             h_hr = data_lr.h;
             tmp = single(...
@@ -50,7 +45,7 @@ classdef data_obj_image_vector < data_obj
 
             I = zeros(double(h_hr.dim(2:5)'));
 
-            data_obj = data_obj_image_volume(I,h_hr);
+            do = do_w_image_volume(I,h_hr);
 
         end
     end

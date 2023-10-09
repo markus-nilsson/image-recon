@@ -4,7 +4,6 @@ classdef cost_imfilter_3d < cost_admm
 
         c_type;
         z;
-        ind; % 4th indices for filtering
 
     end
 
@@ -12,9 +11,8 @@ classdef cost_imfilter_3d < cost_admm
 
         function C = cost_imfilter_3d(c_type, mu, ind)
             if (nargin < 3), ind = []; end
-            C = C@cost_admm(mu);
-            C.c_type = c_type;    
-            C.ind = ind;
+            C = C@cost_admm(mu, ind);
+            C.c_type = c_type;
         end
 
         function [f,b] = do_iter(C, x)
@@ -27,11 +25,11 @@ classdef cost_imfilter_3d < cost_admm
 
         function x_flt = image_filter(C, x, ind)
 
-            if (isempty(ind)), ind = 1:x.h.dim(5); end
+            if (isempty(ind)), ind = (1:x.h.dim(5)) > 0; end
 
             TMP2 = x.imreshape();
 
-            for c = ind
+            for c = find(ind)
 
                 TMP = TMP2(:,:,:,c);
 
@@ -48,11 +46,7 @@ classdef cost_imfilter_3d < cost_admm
 
             end
 
-            if (1)
-                msf_imagesc(TMP);
-            end
-
-            x_flt = x.new(reshape(TMP(:), size(x.w)));
+            x_flt = x.new(reshape(TMP2(:), size(x.w)));
         end
 
 

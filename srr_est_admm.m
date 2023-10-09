@@ -38,7 +38,10 @@ for j = 1:opts.n_iter_admm
 
     if (0)
         subplot(2,2,1);
-        msf_imagesc(data.rs(x));
+        tmp = x.imreshape();
+        msf_imagesc(cat(1, tmp(:,:,:,1), tmp(:,:,:,2), tmp(:,:,:,3)));
+        fc = @(x) x(:);        
+        caxis([0 quantile(fc(tmp), 0.99)]);
         colorbar;
 
         subplot(2,2,2);

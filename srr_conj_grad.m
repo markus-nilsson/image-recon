@@ -65,9 +65,11 @@ if (1)
         normrr = normrr2;
         d = r + beta*d;
 
-
         if (1)
-            msf_imagesc(x.imreshape());
+            tmp = x.imreshape();
+            msf_imagesc(cat(1, tmp(:,:,:,1), tmp(:,:,:,2), tmp(:,:,:,3)));
+            fc = @(x) x(:);
+            caxis([0 quantile(fc(tmp), 0.99)]);
             colorbar;
             pause(0.05);
 
@@ -78,37 +80,5 @@ if (1)
         if (cgr(n) < tol), break; end
         
     end
-
-    
-else % marginally faster at present sizes (23% faster)
-    O = @(w) imr_obj_weights(x.I_sz, x.n_w, w);
-    H = @(w) E(O(w));
-    x = x.w;
-    
-    Ed = H(x);
-    d = b.w - Ed.w;
-    r = d;
-    
-    normrr0 = norm(b.w);
-    normrr  = norm(r);
-    
-    for n = 1:maxit
-        
-        Ed = H(d);
-        tmp = d .* Ed.w;
-        alpha = normrr/sum(col(tmp));
-        x = x + alpha*d;
-        r = r - alpha*Ed.w;
-        normrr2 = norm(r);
-        beta = normrr2/normrr;
-        normrr = normrr2;
-        d = r + beta*d;
-        
-        if (sqrt(normrr/normrr0) < tol), break; end
-        
-    end    
-    
-    x = O(x);
-end
 
 end

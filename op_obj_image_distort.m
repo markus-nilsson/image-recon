@@ -2,9 +2,7 @@ classdef op_obj_image_distort < op_obj_image
 
     methods
 
-        function O = op_obj_image_distort(t, h, k)
-
-            if (nargin < 3), k = 1; end
+        function O = op_obj_image_distort(t, h, n_k)
 
             % not sure where this code should go
             % ideally, null along a phase encode axis instead
@@ -15,7 +13,7 @@ classdef op_obj_image_distort < op_obj_image
             % compute sampling matrix
             S = op_obj_image_distort.S_distort(t, h);
 
-            O = O@op_obj_image(S, h, h, k);
+            O = O@op_obj_image(S, h, h, n_k);
 
         end
 

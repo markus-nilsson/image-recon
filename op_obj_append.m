@@ -35,16 +35,19 @@ classdef op_obj_append < op_obj
 
             switch (O.c_type)
                 case 1 % two image samplers
-                    O.n_mp  = max(A.n_mp, B.n_mp);
-                    O.n_vox = A.n_vox;
-                    O.k = A.k;
+                    assert(A.n_k == B.n_k, 'n_k differs');
+                    assert(A.n_l == B.n_l, 'n_l differs');
+                    O.n_k = A.n_k;
+                    O.n_j = A.n_j;
+                    O.n_l = A.n_l; 
                 case 2 % two dictionaries – no use case?
                     error('check this');
-                case 3 % image sampling first, then addition - probably slower
-                    error('check this'); 
-                case 4
-                    O.n_mp = A.n_mp;
-                    O.n_vox = B.n_vox;
+                case 3 % image sampling first
+                    error('not implemented');
+                case 4 % A: kernel first, B: image sampling
+                    O.n_j = B.n_j;
+                    O.n_k = A.n_k;
+                    O.n_l = A.n_l;
             end
 
             O.A = A;
@@ -52,16 +55,21 @@ classdef op_obj_append < op_obj
 
         end
 
-        function x = init_x(O)
-            x = O.A.init_x(O.n_vox, O.n_mp);
+        function x = init_x(O, a, b)
+            if (nargin < 2), a = O.n_j; end
+            if (nargin < 3), b = O.n_k; end
+            assert(my_isa(O.B, 'op_obj_image'), 'check this');
+            x = O.B.init_x(a, b);
         end
         
-        function y = apply(O,x)
-            y = O.B * (O.A * x);
+        function y = apply(O, x, ind)
+            if (nargin < 3), ind = []; end
+            y = O.B.apply(O.A.apply(x, ind));
         end
 
-        function y = apply_adjoint(O,x)
-            y = O.A' * (O.B' * x);
+        function y = apply_adjoint(O, x, ind)
+            if (nargin < 3), ind = []; end
+            y = O.A.apply_adjoint(O.B.apply_adjoint(x, ind));
         end
 
     end

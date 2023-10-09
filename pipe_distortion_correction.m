@@ -1,5 +1,7 @@
-function [T_ap, T_pa] = pipe_distortion_correction(data_ap, data_pa)
-% function [T_ap, T_pa] = pipe_distortion_correction(data_ap, data_pa)
+function [T_ap, T_pa] = pipe_distortion_correction(data)
+% function [T_ap, T_pa] = pipe_distortion_correction(data)
+
+% assume ap in first dim, pa in second volume
 
 
 % 1. Logistics
@@ -8,8 +10,10 @@ op = msf_tmp_path(1);
 ap_fn = fullfile(op, 'tmp_ap.nii.gz');
 pa_fn = fullfile(op, 'tmp_pa.nii.gz');
 
-mdm_nii_write(data_ap.imreshape(), ap_fn, data_ap.h);
-mdm_nii_write(data_pa.imreshape(), pa_fn, data_pa.h);
+I = data.imreshape();
+
+mdm_nii_write(I(:,:,:,1), ap_fn, data.h);
+mdm_nii_write(I(:,:,:,2), pa_fn, data.h);
 
 
 % 2. Registration

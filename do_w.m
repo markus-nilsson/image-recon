@@ -1,4 +1,4 @@
-classdef data_obj < handle
+classdef do_w < handle
 
     properties
         n_vox = 0;
@@ -9,34 +9,34 @@ classdef data_obj < handle
 
     methods
 
-        function O = data_obj(w)
+        % do_w is a data object with weights, given as a w_il matrix
+        % where i of the numbe of voxels and l the number of model
+        % coefficients or contrasts
+
+        function O = do_w(w)
             O.w = double(w); % necessary for sparse operations
             O.n_vox = size(O.w, 1);
         end
 
         function O_new = new(O, w)
-            O_new = data_obj(w);
+            O_new = do_w(w);
             O_new.transpose = O.transpose;
         end
 
-        function O = ctranspose(O)
-            O.transpose = ~O.transpose;
-        end
-
         function q = minus(a,b)
-            q = data_obj.apply_operator(a,b,@minus);
+            q = do_w.apply_operator(a,b,@minus);
         end
 
         function q = plus(a,b)
-            q = data_obj.apply_operator(a,b,@plus);
+            q = do_w.apply_operator(a,b,@plus);
         end
 
         function q = times(a,b)
-            q = data_obj.apply_operator(a,b,@times);
+            q = do_w.apply_operator(a,b,@times);
         end
 
         function q = mtimes(a,b)
-            q = data_obj.apply_operator(a,b,@mtimes);
+            q = do_w.apply_operator(a,b,@mtimes);
         end
 
         function r = norm(O)
@@ -55,7 +55,6 @@ classdef data_obj < handle
             f = @(x) x + randn(size(x)) * noise_std;
             O.w = f(O.w);
         end        
-        
 
     end
 
@@ -63,17 +62,17 @@ classdef data_obj < handle
 
         function q = apply_operator(a,b,op)
 
-            ca = my_isa(a, 'data_obj');
-            cb = my_isa(b, 'data_obj');
+            ca = my_isa(a, 'do_w');
+            cb = my_isa(b, 'do_w');
 
             if (ca && cb)
                 q = a.new(op(a.w, b.w)); 
-            elseif (ca)
+            elseif (ca) && (isnumeric(b))
                 q = a.new(op(a.w, b)); 
-            elseif (cb)
+            elseif (cb) && (isnumeric(a))
                 q = b.new(op(a, b.w)); 
             else
-                error('unexpected');
+                error('not implemented');
             end
 
         end

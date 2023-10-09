@@ -1,11 +1,11 @@
-classdef data_obj_image_volume < data_obj_image_vector
+classdef do_w_image_volume < do_w_image_vector
     
     methods
 
-        function O = data_obj_image_volume(I, h)
+        function O = do_w_image_volume(I, h)
 
             I = reshape(I, [prod(size(I,1,2,3)) size(I,4)]);
-            O = O@data_obj_image_vector(I, h);
+            O = O@do_w_image_vector(I, h);
 
         end
 
@@ -62,7 +62,7 @@ classdef data_obj_image_volume < data_obj_image_vector
 
             I = zeros(double(h_hr.dim(2:5)'));
 
-            data_obj = data_obj_image_volume(I,h_hr);
+            data_obj = do_w_image_volume(I,h_hr);
 
         end
     end
