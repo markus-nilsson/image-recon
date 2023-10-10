@@ -8,9 +8,7 @@ classdef cost_positivity < cost_admm
 
         function C = cost_positivity(mu, ind)
             if (nargin < 2), ind = []; end
-            
             C = C@cost_admm(mu, ind);
-
         end
 
         function [f,b] = do_iter(C, x)

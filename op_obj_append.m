@@ -19,15 +19,22 @@ classdef op_obj_append < op_obj
             type_a = 'op_obj_image';
             type_b = 'op_obj_kernel';
 
+            if (my_isa(B, 'op_obj_append'))
+                B_tmp = B.B;
+            else
+                B_tmp = B;
+            end
+
+
             if (0) 
                 1;
-            elseif (my_isa(A, type_a) && my_isa(B, type_a))
+            elseif (my_isa(A, type_a) && my_isa(B_tmp, type_a))
                 O.c_type = 1;
-            elseif (my_isa(A, type_b) && my_isa(B, type_b))
+            elseif (my_isa(A, type_b) && my_isa(B_tmp, type_b))
                 O.c_type = 2;
-            elseif (my_isa(A, type_a) && my_isa(B, type_b)) 
+            elseif (my_isa(A, type_a) && my_isa(B_tmp, type_b)) 
                 O.c_type = 3;
-            elseif (my_isa(A, type_b) && my_isa(B, type_a)) 
+            elseif (my_isa(A, type_b) && my_isa(B_tmp, type_a)) 
                 O.c_type = 4;
             else 
                 error('check this');
@@ -35,8 +42,9 @@ classdef op_obj_append < op_obj
 
             switch (O.c_type)
                 case 1 % two image samplers
-                    assert(A.n_k == B.n_k, 'n_k differs');
-                    assert(A.n_l == B.n_l, 'n_l differs');
+                    assert(A.n_k == B_tmp.n_k, 'n_k differs');
+                    assert(A.n_l == B_tmp.n_l, 'n_l differs');
+                    O.n_i = B_tmp.n_i;
                     O.n_k = A.n_k;
                     O.n_j = A.n_j;
                     O.n_l = A.n_l; 
@@ -45,7 +53,8 @@ classdef op_obj_append < op_obj
                 case 3 % image sampling first
                     error('not implemented');
                 case 4 % A: kernel first, B: image sampling
-                    O.n_j = B.n_j;
+                    O.n_i = B_tmp.n_i;
+                    O.n_j = B_tmp.n_j;
                     O.n_k = A.n_k;
                     O.n_l = A.n_l;
             end
@@ -58,7 +67,7 @@ classdef op_obj_append < op_obj
         function x = init_x(O, a, b)
             if (nargin < 2), a = O.n_j; end
             if (nargin < 3), b = O.n_k; end
-            assert(my_isa(O.B, 'op_obj_image'), 'check this');
+            assert(my_isa(O.B, 'op_obj_image') || my_isa(O.B, 'op_obj_append'), 'check this');
             x = O.B.init_x(a, b);
         end
         

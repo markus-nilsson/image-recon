@@ -7,7 +7,9 @@ classdef do_w_image_vector < do_w
     methods
 
         function O = do_w_image_vector(w, h)
-            O = O@do_w(w);
+            assert(size(w,1) == prod(h.dim(2:4)), 'wrong size');
+            O = O@do_w(w);            
+            h.dim(5) = size(w,2);
             O.h = h;            
         end
 
@@ -23,7 +25,7 @@ classdef do_w_image_vector < do_w
         end
 
         function I = imreshape(O)
-            I = reshape(O.w, O.h.dim(2:5)');            
+            I = reshape(O.w, [O.h.dim(2:4)' size(O.w,2)]);            
         end
 
         function O_new = zeros(O)

@@ -4,11 +4,11 @@ classdef op_obj_image < op_obj
         h_lhs;
         h_rhs;
 
-        aM; % adjusted operator
-        aMT; % adjusted adjoint operator
-
         d_type = 'do_w_image_vector'; % applies to this data type
 
+        aM; % adjusted operator
+        aMT; % adjusted adjoint operator
+        
     end
 
     methods
@@ -25,6 +25,12 @@ classdef op_obj_image < op_obj
             O.n_i = size(S,1);
             O.n_j = size(S,2);
             O.n_k = n_k;
+
+            if (~isempty(h_lhs))
+                O.n_l = h_lhs.dim(5);
+            else
+                O.n_l = [];
+            end
 
             O.h_lhs = h_lhs;
             O.h_rhs = h_rhs;
@@ -43,15 +49,23 @@ classdef op_obj_image < op_obj
         end
 
         function data_lhs = apply(O, data_rhs, ind)
-            if (nargin < 3), ind = 1:size(data_rhs.w,2); end
+            if (nargin < 3) || (isempty(ind)), ind = 1:size(data_rhs.w,2); end
             assert(my_isa(data_rhs, O.d_type), 'rhs not a %s', O.d_type);
-            data_lhs = do_w_image_vector(O.aM * data_rhs.w(:,ind), O.h_lhs);
+            data_lhs = do_w_image_vector(O.i_apply(data_rhs.w(:,ind)), O.h_lhs);
+        end
+
+        function w = i_apply(O, w)
+            w = O.aM * w;
         end
 
         function data_rhs = apply_adjoint(O, data_lhs, ind)
             if (nargin < 3) || (isempty(ind)), ind = 1:size(data_lhs.w,2); end
             assert(my_isa(data_lhs, O.d_type), 'rhs not a %s', O.d_type);
-            data_rhs = do_w_image_vector(O.aMT * data_lhs.w(:,ind), O.h_rhs);
+            data_rhs = do_w_image_vector(O.i_apply_adjoint(data_lhs.w(:,ind)), O.h_rhs);
+        end
+
+        function w = i_apply_adjoint(O, w)
+            w = O.aMT * w;
         end
 
     end

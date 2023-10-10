@@ -2,7 +2,7 @@ classdef op_obj_image_h2l < op_obj_image
 
     methods
 
-        function O = op_obj_image_h2l(h_lr, h_hr, n_j)
+        function O = op_obj_image_h2l(h_lr, h_hr, n_k)
 
             % h_lr - header to low resolution image
             % h_hr - header to high resolution image
@@ -11,7 +11,7 @@ classdef op_obj_image_h2l < op_obj_image
             % compute sampling matrix
             S = op_obj_image_h2l.S_h2l(h_hr, h_lr);
 
-            O = O@op_obj_image(S, h_hr, h_lr, n_j);
+            O = O@op_obj_image(S, h_hr, h_lr, n_k);
 
             % somewhat temporary fix: address issue of sampling artifacts
             j = prod(h_lr.pixdim(2:5)) / prod(h_hr.pixdim(2:5));

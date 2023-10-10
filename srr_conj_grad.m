@@ -67,10 +67,9 @@ if (1)
 
         if (1)
             tmp = x.imreshape();
-            msf_imagesc(cat(1, tmp(:,:,:,1), tmp(:,:,:,2), tmp(:,:,:,3)));
-            fc = @(x) x(:);
-            caxis([0 quantile(fc(tmp), 0.99)]);
-            colorbar;
+            subplot(1,3,1);  msf_imagesc(tmp(:,:,:,1));
+            subplot(1,3,2);  msf_imagesc(tmp(:,:,:,2));
+            subplot(1,3,3);  msf_imagesc(tmp(:,:,:,3));
             pause(0.05);
 
         end

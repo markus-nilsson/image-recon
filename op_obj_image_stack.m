@@ -25,8 +25,7 @@ classdef op_obj_image_stack < op_obj_image
             O.n_i = cellfun(@(x) x.n_i, O_list);
             O.n_j = O.O_list{1}.n_j;
             O.n_k = O.O_list{1}.n_k;
-            O.n_l = max(O.l_list);
-
+            O.n_l = max(cellfun(@(x) max(x), O.l_list));
             
         end
        
@@ -41,7 +40,7 @@ classdef op_obj_image_stack < op_obj_image
         function data_lhs = apply(O, data_rhs)
             data_lhs = do_c(numel(O.O_list));
             for c = 1:numel(O.O_list)
-                data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs, O.l_list(c));
+                data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs, O.l_list{c});
             end
         end
 
@@ -56,7 +55,7 @@ classdef op_obj_image_stack < op_obj_image
             data_rhs = O.init_x(); 
             for c = ind          
                 tmp = O.O_list{c}.apply_adjoint(data_lhs.data_obj{c});
-                data_rhs.add( tmp, O.l_list(c));
+                data_rhs.add( tmp, O.l_list{c});
             end         
         end
     end

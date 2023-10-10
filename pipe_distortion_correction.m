@@ -1,4 +1,4 @@
-function [T_ap, T_pa] = pipe_distortion_correction(data)
+function [T_ap, T_pa] = pipe_distortion_correction(data, ind_ap, ind_pa)
 % function [T_ap, T_pa] = pipe_distortion_correction(data)
 
 % assume ap in first dim, pa in second volume
@@ -12,14 +12,14 @@ pa_fn = fullfile(op, 'tmp_pa.nii.gz');
 
 I = data.imreshape();
 
-mdm_nii_write(I(:,:,:,1), ap_fn, data.h);
-mdm_nii_write(I(:,:,:,2), pa_fn, data.h);
+mdm_nii_write(I(:,:,:,ind_ap), ap_fn, data.h);
+mdm_nii_write(I(:,:,:,ind_pa), pa_fn, data.h);
 
 
 % 2. Registration
 p = elastix_p_affine(500);
 p.Transform = 'BSplineTransform';
-p.FinalGridSpacingInVoxels  = [ 1 1 1 ] * 16;
+p.FinalGridSpacingInVoxels  = [ 1 1 1 ] * 20;
 p_fn = elastix_p_write(p, 'p.txt');
 
 opt.mio.coreg.clear_header = 0;
@@ -43,6 +43,7 @@ msf_delete(fullfile(op, 'deformationField.nii'));
 msf_system(sprintf('transformix -def all -out %s -tp %s', op, t_pa_fn));
 T_pa = mdm_nii_read(fullfile(op, 'deformationField.nii'));
 
+if (size(T_ap, 5) ~= 3), error('using an old framework? bad nii_read'); end
 
 % 4. Edit displacement fields
 T_ap = permute(T_ap, [1 2 3 5 4]) / 2;
