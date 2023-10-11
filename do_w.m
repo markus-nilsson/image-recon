@@ -40,7 +40,7 @@ classdef do_w < handle
         end
 
         function r = norm(O)
-            r = sum(O.w(:).^2);
+            r = sum(O.w(~isnan(O.w(:))).^2);
         end
 
         function s = sum(O)

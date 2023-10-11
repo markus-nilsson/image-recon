@@ -3,7 +3,7 @@ function [x,r,cgr] = srr_est_admm(O, data, opts)
 
 % Manage  input...
 if (nargin < 3), opts = []; end
-opts = default_opts(opts);
+opts = default_opts(opts, O);
 
 % ADMM Iterations
 r = zeros(1, opts.n_iter_admm);
@@ -17,7 +17,7 @@ for j = 1:opts.n_iter_admm
 
     if (j == 1) % Init: y = A * x --> data = E * x (n,1 = n,m x m,1)
         bp = O' * data;
-        x = O.init_x();
+        x = opts.init_x();
     end
 
     b = bp; % A' * y precomputed
@@ -61,12 +61,13 @@ end
 
 end
 
-function opts = default_opts(opts)
+function opts = default_opts(opts, O)
 
     function opts = f(opts, fn, value)
         if (~isfield(opts, fn)), opts.(fn) = value; end
     end
 
+opts = f(opts, 'init_x', @() O.init_x());
 opts = f(opts, 'n_iter_admm', 10);
 opts = f(opts, 'n_iter_cg', 15);
 opts = f(opts, 'cost', {});

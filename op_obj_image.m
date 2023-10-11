@@ -20,11 +20,16 @@ classdef op_obj_image < op_obj
             if (nargin < 3), h_lhs = []; end
             if (nargin < 4), n_k = []; end
 
-            O = O@op_obj();
+            O = O@op_obj();          
 
-            O.n_i = size(S,1);
-            O.n_j = size(S,2);
+            O.n_i = prod(h_lhs.dim(2:4));
+            O.n_j = prod(h_rhs.dim(2:4)); 
             O.n_k = n_k;
+
+            if (~isempty(S))
+                assert(O.n_i == size(S,1), 'wrong size');
+                assert(O.n_j == size(S,2), 'wrong size');
+            end
 
             if (~isempty(h_lhs))
                 O.n_l = h_lhs.dim(5);
@@ -51,21 +56,21 @@ classdef op_obj_image < op_obj
         function data_lhs = apply(O, data_rhs, ind)
             if (nargin < 3) || (isempty(ind)), ind = 1:size(data_rhs.w,2); end
             assert(my_isa(data_rhs, O.d_type), 'rhs not a %s', O.d_type);
-            data_lhs = do_w_image_vector(O.i_apply(data_rhs.w(:,ind)), O.h_lhs);
+            data_lhs = do_w_image_vector(O.i_apply(data_rhs, ind), O.h_lhs);
         end
 
-        function w = i_apply(O, w)
-            w = O.aM * w;
+        function w = i_apply(O, d, ind)
+            w = O.aM * d.w(:, ind);
         end
 
         function data_rhs = apply_adjoint(O, data_lhs, ind)
             if (nargin < 3) || (isempty(ind)), ind = 1:size(data_lhs.w,2); end
             assert(my_isa(data_lhs, O.d_type), 'rhs not a %s', O.d_type);
-            data_rhs = do_w_image_vector(O.i_apply_adjoint(data_lhs.w(:,ind)), O.h_rhs);
+            data_rhs = do_w_image_vector(O.i_apply_adjoint(data_lhs, ind), O.h_rhs);
         end
 
-        function w = i_apply_adjoint(O, w)
-            w = O.aMT * w;
+        function w = i_apply_adjoint(O, d, ind)
+            w = O.aMT * d.w(:, ind);
         end
 
     end

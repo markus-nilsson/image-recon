@@ -24,19 +24,12 @@ classdef op_obj_image_reweigh < op_obj_image
 
         end
 
-        function data_lhs = apply(O, data_rhs, ind)
-            if (nargin < 3) || (isempty(ind)), ind = 1:size(data_rhs.w,2); end
-            assert(my_isa(data_rhs, O.d_type), 'rhs not a %s', O.d_type);
-            data_lhs = do_w_image_vector(O.W(:,ind) .* data_rhs.w(:,ind), O.h_lhs);
+        function w = i_apply(w, ind)
+            w = O.W(:, ind) .* d.w(:, ind);
         end
 
-            
-
-
-        function data_rhs = apply_adjoint(O, data_lhs, ind)
-            if (nargin < 3) || (isempty(ind)), ind = 1:size(data_lhs.w,2); end
-            assert(my_isa(data_lhs, O.d_type), 'rhs not a %s', O.d_type);
-            data_rhs = do_w_image_vector(O.WT(:,ind) .* data_lhs.w(:,ind), O.h_rhs);
+        function w = i_apply_adjoint(w, ind)
+            w = O.WT(:, ind) .* d.w(:, ind);
         end
 
     end
