@@ -30,7 +30,15 @@ classdef do_w_image_vector < do_w
 
         function O_new = zeros(O)
             O_new = do_w_image_vector(zeros(size(O.w)), O.h);
-        end       
+        end     
+
+        function d = dim(O, ind)
+            d = O.h.dim(2:5)';
+            if (nargin > 1)
+                d = d(ind);
+            end
+
+        end
 
     end
 

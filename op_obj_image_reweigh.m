@@ -24,11 +24,11 @@ classdef op_obj_image_reweigh < op_obj_image
 
         end
 
-        function w = i_apply(w, ind)
+        function w = i_apply(O, d, ind)
             w = O.W(:, ind) .* d.w(:, ind);
         end
 
-        function w = i_apply_adjoint(w, ind)
+        function w = i_apply_adjoint(O, d, ind)
             w = O.WT(:, ind) .* d.w(:, ind);
         end
 

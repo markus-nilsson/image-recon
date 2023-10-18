@@ -37,10 +37,17 @@ classdef op_obj_image_stack < op_obj_image
 
         % example use: make multiple samles of high resolution object
         % with different sampling orientations (e.g. many low-res objects)
-        function data_lhs = apply(O, data_rhs)
+        function data_lhs = apply(O, data_rhs, ind)
+
+            if (nargin < 3), ind = []; end
+            
+            if (isempty(ind))
+                ind = cell2mat(O.l_list);
+            end
+            
             data_lhs = do_c(numel(O.O_list));
             for c = 1:numel(O.O_list)
-                data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs, O.l_list{c});
+                data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs, ind(c));
             end
         end
 

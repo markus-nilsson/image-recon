@@ -35,11 +35,22 @@ classdef cost_imfilter_3d < cost_admm
 
                 switch (C.c_type)
                     case 1
-                        TMP = medfilt3(TMP, [3 3 3]);
+                        TMP = medfilt3(real(TMP), [3 3 3]);
                     case 2
                         TMP = mio_smooth_4d(TMP, 0.6);
                     case 3
-                        TMP = medfilt3(TMP, [5 5 5]);
+                        TMP = medfilt3(real(TMP), [5 5 5]);
+                    case 4
+                        TMP = medfilt3(real(TMP), [7 7 7]);
+
+                    case 5
+
+                        f = @(x) x .* (abs(x) > 10);
+
+                        for k = 1:size(TMP, 3)
+                            [wc,ws] = wavedec2(real(TMP), 8, 'db4');
+                            TMP(:,:,k) = waverec2(f(wc),ws,'db4');
+                        end
                 end
 
                 TMP2(:,:,:,c) = TMP;

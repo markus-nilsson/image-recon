@@ -8,7 +8,7 @@ classdef op_obj_image < op_obj
 
         aM; % adjusted operator
         aMT; % adjusted adjoint operator
-        
+
     end
 
     methods
@@ -20,10 +20,10 @@ classdef op_obj_image < op_obj
             if (nargin < 3), h_lhs = []; end
             if (nargin < 4), n_k = []; end
 
-            O = O@op_obj();          
+            O = O@op_obj();
 
-            O.n_i = prod(h_lhs.dim(2:4));
-            O.n_j = prod(h_rhs.dim(2:4)); 
+            if (~isempty(h_lhs)), O.n_i = prod(h_lhs.dim(2:4)); end
+            if (~isempty(h_rhs)), O.n_j = prod(h_rhs.dim(2:4)); end
             O.n_k = n_k;
 
             if (~isempty(S))
@@ -54,9 +54,28 @@ classdef op_obj_image < op_obj
         end
 
         function data_lhs = apply(O, data_rhs, ind)
-            if (nargin < 3) || (isempty(ind)), ind = 1:size(data_rhs.w,2); end
-            assert(my_isa(data_rhs, O.d_type), 'rhs not a %s', O.d_type);
-            data_lhs = do_w_image_vector(O.i_apply(data_rhs, ind), O.h_lhs);
+
+            if (nargin < 3), ind = []; end
+
+            if (my_isa(data_rhs, 'do_c'))
+
+                data_lhs = do_c(numel(data_rhs));
+                for c = 1:numel(data_rhs)
+                    data_lhs.data_obj{c} = O.apply(data_rhs.data_obj{c}, ind);
+                end
+
+
+            elseif (my_isa(data_rhs, 'do_w'))
+
+                if (isempty(ind)), ind = 1:size(data_rhs.w,2); end
+                data_lhs = do_w_image_vector(O.i_apply(data_rhs, ind), O.h_lhs);
+
+            else
+
+                error('bad data type);')
+
+            end
+
         end
 
         function w = i_apply(O, d, ind)
@@ -64,9 +83,25 @@ classdef op_obj_image < op_obj
         end
 
         function data_rhs = apply_adjoint(O, data_lhs, ind)
-            if (nargin < 3) || (isempty(ind)), ind = 1:size(data_lhs.w,2); end
-            assert(my_isa(data_lhs, O.d_type), 'rhs not a %s', O.d_type);
-            data_rhs = do_w_image_vector(O.i_apply_adjoint(data_lhs, ind), O.h_rhs);
+            if (nargin < 3), ind = []; end
+
+            if (my_isa(data_lhs, 'do_c'))
+
+                data_rhs = do_c(numel(data_lhs));
+                for c = 1:numel(data_lhs)
+                    data_rhs.data_obj{c} = O.apply_adjoint(data_lhs.data_obj{c}, ind);
+                end
+                
+            
+            elseif (my_isa(data_lhs, 'do_w'))
+
+                if (isempty(ind)), ind = 1:size(data_lhs.w,2); end
+                data_rhs = do_w_image_vector(O.i_apply_adjoint(data_lhs, ind), O.h_rhs);
+            
+            else
+                error('bad data type');
+            end
+
         end
 
         function w = i_apply_adjoint(O, d, ind)

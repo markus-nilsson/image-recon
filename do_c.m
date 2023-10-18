@@ -27,6 +27,30 @@ classdef do_c < do
         function O_new = subsample(O, ind)
             O_new = do_c(O.data_obj(ind));
         end
+
+        function I = imreshape(O)
+
+            A = zeros(4, numel(O.data_obj));
+            for c = 1:numel(O.data_obj)
+                A(:,c) = O.data_obj{c}.dim(1:4);
+            end
+
+            if (~all(A == A(:,1)))
+                error('different dims of data objs');
+            end
+
+            if (~all(A(4,:) == 1))
+                error('cannot deal with 4d objs yet');
+            end
+
+            I = zeros(A(:,1)');
+
+            for c = 1:numel(O.data_obj)
+                I(:,:,:,c) = O.data_obj{c}.imreshape();
+            end
+
+
+        end
         
 
         function q = minus(a,b)

@@ -23,6 +23,19 @@ classdef do_w < handle
             O_new.transpose = O.transpose;
         end
 
+        function O_new = subsample(O, ind)
+            O_new = O.new(O.w(:, ind));
+        end
+
+        function O_new = mean(O, ind)
+            O_new = O.new(mean(O.w(:, ind),2));
+        end
+
+        function O_new = min(O, ind)
+            O_new = O.new(min(O.w(:, ind),[],2));
+        end
+
+
         function q = minus(a,b)
             q = do_w.apply_operator(a,b,@minus);
         end

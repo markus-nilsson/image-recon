@@ -25,16 +25,22 @@ classdef op_obj_append < op_obj
                 B_tmp = B;
             end
 
+            if (my_isa(A, 'op_obj_append'))
+                A_tmp = A.A;
+            else
+                A_tmp = A;
+            end
+
 
             if (0) 
                 1;
-            elseif (my_isa(A, type_a) && my_isa(B_tmp, type_a))
+            elseif (my_isa(A_tmp, type_a) && my_isa(B_tmp, type_a))
                 O.c_type = 1;
-            elseif (my_isa(A, type_b) && my_isa(B_tmp, type_b))
+            elseif (my_isa(A_tmp, type_b) && my_isa(B_tmp, type_b))
                 O.c_type = 2;
-            elseif (my_isa(A, type_a) && my_isa(B_tmp, type_b)) 
+            elseif (my_isa(A_tmp, type_a) && my_isa(B_tmp, type_b)) 
                 O.c_type = 3;
-            elseif (my_isa(A, type_b) && my_isa(B_tmp, type_a)) 
+            elseif (my_isa(A_tmp, type_b) && my_isa(B_tmp, type_a)) 
                 O.c_type = 4;
             else 
                 error('check this');
@@ -73,7 +79,8 @@ classdef op_obj_append < op_obj
         
         function y = apply(O, x, ind)
             if (nargin < 3), ind = []; end
-            y = O.B.apply(O.A.apply(x, ind));
+            tmp = O.A.apply(x, ind);
+            y = O.B.apply(tmp);
         end
 
         function y = apply_adjoint(O, x, ind)
