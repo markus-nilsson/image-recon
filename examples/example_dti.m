@@ -1,9 +1,14 @@
-
+% Purpose:
+% 
+% Reconstruct the diffusion tensor from a DTI data set, using a 
+% log-operator. Warning: Does not work, needs more work.
 
 % 1. Load DTI set
 % ----------------------------------------------------------------------
 if (1)
-    source_fn = fullfile('../../data/dti/Serie_06_DTI_30dir_mc.nii.gz');
+    source_fn = fullfile(example_data_path, ...
+        '/dti/Serie_06_DTI_30dir_mc.nii.gz');
+
     data = do_w_from_nii(source_fn);
 
     data.trim(20:110, 10:115, 30 + (-3:3), []);
@@ -15,7 +20,6 @@ end
 % 2. Kernel and log operators
 % ----------------------------------------------------------------------
 if (1)
-
     O = op_obj_kernel_dti_cum(data);
     L = op_obj_image_logexp(data.w, data.h, data.h, O.n_k);
     O2 = op_obj_append(O, L);
@@ -28,8 +32,8 @@ if (1)
     opts.cost = {...
         cost_imfilter_3d(1, 0.02)};
     
-    opts.n_iter_admm = 2;
-    opts.n_iter_cg = 5;
+    opts.n_iter_admm = 10;
+    opts.n_iter_cg = 10;
 
     y_est = srr_est_admm(O2, data_log, opts);
 

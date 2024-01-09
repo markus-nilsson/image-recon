@@ -1,11 +1,5 @@
 classdef op_obj_image_logexp < op_obj_image
 
-    properties
-
-        S;
-
-    end
-
     methods
 
         % reweigh the elements by .* operation

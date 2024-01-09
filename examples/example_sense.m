@@ -1,14 +1,16 @@
-
+% Purpose: Test the approach for parallell imaging – it works for a
+% paralell imaging factor of 2, but not higher, at present
 
 % 1. Load high-resolution images
 % ----------------------------------------------------------------------
 if (1)
-    source_fn = '../../data/srr_mdt_data/Serie_03_t1_mprage_tra_ovinkladforneuronavigering.nii.gz';
+    source_fn = fullfile(example_data_path, ...
+        'srr_mdt_data/Serie_03_t1_mprage_tra_ovinkladforneuronavigering.nii.gz');
     data_hr = do_w_from_nii(source_fn);
-    data_hr.trim([], [], 90, []);
+    data_hr.trim([], [], 90, []); % select one slice only for now
 end
 
-% 2. Make coil sensitivity maps
+% 2. Make our own coil sensitivity maps
 if (1)
 
     n = 8;
@@ -47,7 +49,8 @@ if (1)
     O_FT = op_obj_image_ft(data_hr.h, data_hr.h, 1);
 
     % Undersampling operator
-    w = (x > 0) & (mod(y, 2) == 1);
+    PI_factor = 2;
+    w = (x > 0) & (mod(y, PI_factor) == 1);
     W = reshape(w, [numel(w) 1]);
     WT = W;   
 
@@ -66,12 +69,15 @@ end
 % 4 Reconstruct and view
 if (1)
     clear opts;
-
-    opts.n_iter_admm = 5;
+   
+    opts.n_iter_admm = 1; % admm not needed here
+    opts.n_iter_cg = 30;
 
     y_est = srr_est_admm(O2, data, opts);
 
+    msf_clf;
     msf_imagesc(abs(y_est.imreshape()));
+    colorbar;
 
 end
 

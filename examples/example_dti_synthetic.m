@@ -1,9 +1,11 @@
-
+% Purpose: Reconstruct DTI data from multiple independent rotations
+% 
+error('Not compatible with this verision of the framework, yet'); 
 
 % 1. Load DTI set
 % ----------------------------------------------------------------------
 if (1)
-    bp = '../../data/dti/';
+    bp = fullfile(example_data_path, 'dti');
     source_fn = fullfile(bp, 'Serie_06_DTI_30dir_mc.nii.gz');
     I = mdm_nii_read(source_fn);
 
@@ -23,11 +25,12 @@ if (1)
     
     S_list = {};
     for c = 1:n_rot
-        R = imr_op_rotate2d(sz, theta(c), aspect_ratio);
+        
+        R = op_obj_image_h2l.tmp_rotate2d(sz, theta(c), aspect_ratio);
 
         k_list = [1 1 + (1:3) + (c-1)*3];
         for k = 1:numel(k_list)
-            S = op_obj_sample_image(R, sz);
+            S = op_obj(R, sz);
             S.k = k_list(k);
             S_list{end+1} = S;
         end
@@ -37,14 +40,14 @@ end
 
 % 3. Downsample to produce virtual measurement
 if (1)
-    O = op_obj_sample_images(S_list);
+    O = op_obj_image_stack(S_list);
     y_lr = O * y_hr;
 end
 
 % 4. Add a DTI kernel 
 if (1)
-    K = op_obj_dti(xps);
-    J = op_obj_join(K, O);
+    K = op_obj_kernel_dti(xps);
+    J = op_obj_append(K, O);
 end
 
 
@@ -69,7 +72,7 @@ if (1)
     end
 end
 
-% 6. Grab the diffusion metrics
+% 6. Grab the diffusion metrics (works in progress)
 if (0)
     tmp = K.x_to_m(y_est);
 end 

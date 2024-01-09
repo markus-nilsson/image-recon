@@ -7,7 +7,6 @@ opts = default_opts(opts, O);
 
 % ADMM Iterations
 r = zeros(1, opts.n_iter_admm);
-rx = zeros(size(r));
 for j = 1:opts.n_iter_admm
     disp(j)
 
@@ -34,10 +33,7 @@ for j = 1:opts.n_iter_admm
     x_old = x;
     [x,cgr{j}] = srr_conj_grad(f, b, x, opts);
     r(j) = norm(O * x - data);
-    rx(j) = norm(x - x_old);
 
-    msf_imagesc(x.imreshape(), 3, [], 1); pause(0.05);
-    1;
 
 end
 
