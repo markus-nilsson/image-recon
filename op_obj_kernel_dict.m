@@ -1,4 +1,4 @@
-classdef op_obj_dict < op_obj
+classdef op_obj_kernel_dict < op_obj_kernel
 
     properties
         S_k;
@@ -11,7 +11,7 @@ classdef op_obj_dict < op_obj
     
     methods
         
-        function O = op_obj_dict(S_k, mp_list, n_comp, n_vox)
+        function O = op_obj_kernel_dict(S_k, mp_list, n_comp, n_vox)
 
             if (numel(mp_list) ~= (ndims(S_k)-1))
                 error('expecting a %i cells for mp_list', ndims(S_k)-1);

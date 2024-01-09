@@ -1,7 +1,8 @@
 classdef do_c < do
 
     properties
-        data_obj = {};
+        data_obj = {};   
+        h;
     end
 
     methods
@@ -9,7 +10,7 @@ classdef do_c < do
         % data object as cell - the data object w_il is here represented
         % as (w_l){l}, meaning the second dimension is the number of cells
         % 
-        % note that l = 1..n_vox, where n_vox(l)        
+        % note that i = 1..n_vox, where n_vox(l)        
 
         function O = do_c(varargin)
 
@@ -24,8 +25,25 @@ classdef do_c < do
 
         end
 
+        function O_new = new(O, data_obj)
+            O_new = do_c(data_obj);
+        end
+
+        function O_new = copy(O)
+            tmp = cell(size(O.data_obj));
+            for c = 1:numel(O.data_obj)
+                tmp{c} = O.data_obj{c}.copy();
+            end
+            O_new = new(O, tmp);
+        end
+
         function O_new = subsample(O, ind)
             O_new = do_c(O.data_obj(ind));
+        end
+
+        function O = select(O, ind)
+            if (numel(ind)~=1), error('assume selecting single object'); end
+            O = O.data_obj{ind};
         end
 
         function I = imreshape(O)
@@ -88,9 +106,28 @@ classdef do_c < do
             end
         end
 
-        function O_new = new(O, w)
-            error('not implemented');
+        function O = trim(O, ir, jr, kr, vr)
+            for c = 1:numel(O)
+                O.data_obj{c}.trim(ir, jr, kr, vr);
+            end
         end
+
+        function dim = dim(O, c_dim)
+            if (nargin < 2), c_dim = 1:4; end
+            dim = zeros(numel(c_dim), numel(O.data_obj));
+            for c = 1:size(dim,2)
+                dim(:, c) = O.data_obj{c}.dim(c_dim);
+            end
+        end
+        
+        function h = get.h(O)
+            h = cell(1, numel(O));
+            for c = 1:numel(h)
+                h{c} = O.data_obj{c}.h;
+            end
+        end
+
+        
 
         function s = sum(O)
             error('not implemented');

@@ -2,7 +2,6 @@ classdef do_c_from_nii < do_c
 
     properties
         fns = {};
-        h;
     end
 
     methods
@@ -19,17 +18,12 @@ classdef do_c_from_nii < do_c
 
         end
 
-        function O = trim(O, ir, jr, kr, vr)
-            for c = 1:numel(O)
-                O.data_obj{c}.trim(ir, jr, kr, vr);
-            end
-        end
+        function O = powder_average(O)
 
-        function h = get.h(O)
-            h = cell(1, numel(O));
-            for c = 1:numel(h)
-                h{c} = O.data_obj{c}.h;
+            for c = 1:numel(O.data_obj)
+                O.data_obj{c}.powder_average();
             end
+
         end
 
     end

@@ -32,30 +32,12 @@ for j = 1:opts.n_iter_admm
 
     % solve main problem; update x and compute the residual
     x_old = x;
-    [x,cgr{j}] = srr_conj_grad(f, b, opts.tol, opts.n_iter_cg, x);
+    [x,cgr{j}] = srr_conj_grad(f, b, x, opts);
     r(j) = norm(O * x - data);
     rx(j) = norm(x - x_old);
 
-    if (0)
-        subplot(2,2,1);
-        tmp = x.imreshape();
-        msf_imagesc(cat(1, tmp(:,:,:,1), tmp(:,:,:,2), tmp(:,:,:,3)));
-        fc = @(x) x(:);        
-        caxis([0 quantile(fc(tmp), 0.99)]);
-        colorbar;
-
-        subplot(2,2,2);
-        plot(r);     
-
-        subplot(2,2,3);
-        plot(rx);
-
-        pause(0.05);
-    end
-
-%     if (j > 3) && ( (rx(j) / min(x( (1:numel(x)) < (j-1) ))) > 0.99)
-%         break;
-%     end
+    msf_imagesc(x.imreshape(), 3, [], 1); pause(0.05);
+    1;
 
 end
 
@@ -71,7 +53,8 @@ opts = f(opts, 'init_x', @() O.init_x());
 opts = f(opts, 'n_iter_admm', 10);
 opts = f(opts, 'n_iter_cg', 15);
 opts = f(opts, 'cost', {});
-opts = f(opts, 'tol', 1e-12);
+opts = f(opts, 'cg_tol', 1e-12);
+opts = f(opts, 'cg_display_ind', []);
 
 
 end

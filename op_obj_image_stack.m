@@ -11,6 +11,12 @@ classdef op_obj_image_stack < op_obj_image
 
         function O = op_obj_image_stack(O_list, l_list)
 
+            if (nargin < 2)
+                for c = 1:numel(O_list)
+                    l_list{c} = 1:O_list{c}.n_l;
+                end
+            end
+
             assert(all(O_list{1}.n_j == cellfun(@(x) x.n_j, O_list)), ...
                 'All objects must act on the same hr object (n_j)');            
 
@@ -22,10 +28,16 @@ classdef op_obj_image_stack < op_obj_image
             O.O_list = O_list;
             O.l_list = l_list;
 
-            O.n_i = cellfun(@(x) x.n_i, O_list);
+            O.n_i = cellfun(@(x) x.n_i, O_list, 'UniformOutput', false);
             O.n_j = O.O_list{1}.n_j;
             O.n_k = O.O_list{1}.n_k;
-            O.n_l = max(cellfun(@(x) max(x), O.l_list));
+
+            if (all(cellfun(@(x) isempty(x), O.l_list)))
+                % temporary fix
+                O.n_l = O.O_list{1}.n_l;
+            else
+                O.n_l = max(cellfun(@(x) max(x), O.l_list));
+            end
             
         end
        
@@ -42,12 +54,18 @@ classdef op_obj_image_stack < op_obj_image
             if (nargin < 3), ind = []; end
             
             if (isempty(ind))
-                ind = cell2mat(O.l_list);
+                ind = cell2mat(O.l_list')';
+            end
+
+            if (isempty(ind))
+                f_ind = @(c) [];
+            else
+                f_ind = @(c) ind(:,c);
             end
             
             data_lhs = do_c(numel(O.O_list));
             for c = 1:numel(O.O_list)
-                data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs, ind(c));
+                data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs, f_ind(c));
             end
         end
 

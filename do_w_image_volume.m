@@ -31,9 +31,9 @@ classdef do_w_image_volume < do_w_image_vector
             X = X(1:3, 1:3);
             X = X - diag(diag(X));
 
-            if (sum(X(:).^2) > 1e-5)
-                error('need transverse slices for now');
-            end
+%             if (sum(X(:).^2) > 1e-5)
+%                 error('need transverse slices for now');
+%             end
 
             I = zeros(double(h_hr.dim(2:5)'));
 

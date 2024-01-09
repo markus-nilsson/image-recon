@@ -14,9 +14,15 @@ classdef do_w_image_vector < do_w
         end
 
         function O_new = new(O, w)
-            assert(prod(O.h.dim(2:4)) == size(w, 1), 'size error');
-            O.h.dim(5) = size(w,2);
-            O_new = do_w_image_vector(w, O.h);
+            if (ismatrix(w))
+                assert(prod(O.h.dim(2:4)) == size(w, 1), 'size error');
+            else
+                assert(all(size(w, [1 2 3 4])' == O.h.dim(2:5)), 'size error');
+                w = reshape(w, prod(size(w, [1 2 3])), size(w,4));
+            end
+            h = O.h;
+            h.dim(5) = size(w,2);
+            O_new = do_w_image_vector(w, h);
         end
 
         function O = add(O, w, l)
@@ -30,7 +36,15 @@ classdef do_w_image_vector < do_w
 
         function O_new = zeros(O)
             O_new = do_w_image_vector(zeros(size(O.w)), O.h);
-        end     
+        end   
+
+        function O = subsample(O, ind)
+
+            O = subsample@do_w(O, ind);
+            O.h.dim(5) = size(O.w, 2);
+            
+        end
+
 
         function d = dim(O, ind)
             d = O.h.dim(2:5)';
@@ -71,7 +85,31 @@ classdef do_w_image_vector < do_w
             O.h.srow_y(4) = physc(2);
             O.h.srow_z(4) = physc(3);
             
-        end        
+        end       
+
+
+        function w = patch(O, i,j,k,l,s)
+
+            if (s > 0)
+                ir = i + (-s:s)';
+                jr = j + (-s:s)';
+                kr = k + (-s:s)';
+            else
+                ir = i;
+                jr = j;
+                kr = k;
+            end
+
+            ir = ir( (ir >= 1) & (ir <= O.dim(1)));
+            jr = jr( (jr >= 1) & (jr <= O.dim(2)));
+            kr = kr( (kr >= 1) & (kr <= O.dim(3)));
+
+            sub = combvec(ir', jr', kr');
+            ind = sub2ind(O.dim(1:3), sub(1, :), sub(2,:), sub(3, :));
+
+            w = reshape(O.w(ind, l), numel(ir), numel(jr), numel(kr));
+
+        end
 
     end
 

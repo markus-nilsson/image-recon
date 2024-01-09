@@ -1,4 +1,4 @@
-function [x,cgr] = srr_conj_grad(E,b,tol,maxit,x)
+function [x,cgr] = srr_conj_grad(E,b,x,opts)
 % A conjugate gradient solver that allows to plot the result in each
 % iteration
 % Solves: E*x=b
@@ -50,11 +50,10 @@ if (1)
     normrr0 = norm(b);%.norm();
     normrr  = norm(r);%r.norm();
     
-    for n = 1:maxit
+    for n = 1:opts.n_iter_cg
         
         Ed = E(d);
         tmp = d .* Ed;
-
 
         alpha = normrr/(sum(col(tmp))+eps);
         x = x + alpha*d;
@@ -65,18 +64,48 @@ if (1)
         normrr = normrr2;
         d = r + beta*d;
 
-        if (1)
+        if (numel(opts.cg_display_ind) > 0)
+            msf_clf;
             tmp = x.imreshape();
-            subplot(1,3,1);  msf_imagesc(tmp(:,:,:,1));
-            subplot(1,3,2);  msf_imagesc(tmp(:,:,:,2));
-            subplot(1,3,3);  msf_imagesc(tmp(:,:,:,3));
+
+            switch (numel(opts.cg_display_ind))
+                case 1
+                    nr = 1;
+                    nc = 1;
+                case 2
+                    nr = 1;
+                    nc = 2;
+                case 3
+                    nr = 1;
+                    nc = 3;
+                case 4
+                    nr = 2;
+                    nc = 2;
+                case 5
+                    nr = 1;
+                    nc = 5;
+                case 6
+                    nr = 2;
+                    nc = 3;
+                otherwise
+                    nr = 2;
+                    nc = 3;
+                    opts.cg_display_ind = opts.cg_display_ind(1:6);
+            end
+
+            for c = 1:numel(opts.cg_display_ind)
+                subplot(nr,nc,c);
+                msf_imagesc(real(tmp(:,:,:,opts.cg_display_ind(c))));
+                colorbar;
+                title(num2str(sqrt(normrr/normrr0)));
+            end
             pause(0.05);
 
         end
 
         cgr(n) = sqrt(normrr/normrr0);
 
-        if (cgr(n) < tol), break; end
+        if (cgr(n) < opts.cg_tol), break; end
         
     end
 
