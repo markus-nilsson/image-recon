@@ -2,6 +2,7 @@ classdef do < handle
 
     properties
         transpose = 0;
+        c_type; % 1 - weights; 2 - cell
     end
 
     methods
@@ -29,12 +30,12 @@ classdef do < handle
 
     methods (Abstract)
 
-        O_new = new(O, w)
-        r = norm(O)
-        s = sum(O)
-        n = numel(O)
-
-        O_new = add_noise_gaussian(O, noise_std)
+%         O_new = new(O, w)
+%         r = norm(O)
+%         s = sum(O)
+%         n = numel(O)
+% 
+%         O_new = add_noise_gaussian(O, noise_std)
 
     end
 

@@ -21,15 +21,24 @@ classdef op_obj_image_reweigh < op_obj_image
             O.W = W;
             O.WT = WT;
 
-
         end
 
         function w = i_apply(O, d, ind)
-            w = O.W(:, ind) .* d.w(:, ind);
+            if (size(O.W,2) == 1) && (max(ind) > 1) % temp fix
+                w = O.W .* d.w(:, ind);
+            else
+                w = O.W(:, ind) .* d.w(:, ind);
+            end
+
         end
 
         function w = i_apply_adjoint(O, d, ind)
-            w = O.WT(:, ind) .* d.w(:, ind);
+            if (size(O.WT,2) == 1) && (max(ind) > 1) % temp fix
+                w = O.WT .* d.w(:, ind);
+            else
+                w = O.WT(:, ind) .* d.w(:, ind);
+            end
+
         end
 
     end

@@ -12,7 +12,6 @@ classdef op_obj_image_ft < op_obj_image
 
         function w = i_apply(O, d, ind)
             w = d.imreshape();
-            w = w(:,:,:,ind);
             w = fftn(w);
             w = reshape(w, prod(size(w,1,2,3)), size(w,4));
         end
@@ -20,7 +19,6 @@ classdef op_obj_image_ft < op_obj_image
 
         function w = i_apply_adjoint(O, d, ind)
             w = d.imreshape();
-            w = w(:,:,:,ind);
             w = ifftn(w);
             w = reshape(w, prod(size(w,1,2,3)), size(w,4));
         end

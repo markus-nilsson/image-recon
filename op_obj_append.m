@@ -80,12 +80,14 @@ classdef op_obj_append < op_obj
         function x = init_x(O, a, b)
             if (nargin < 2), a = O.n_j; end
             if (nargin < 3), b = O.n_k; end
+
+            x = O.A.init_x(a, b);
             
-            if (~ ((my_isa(O.B, 'op_obj_image') || my_isa(O.B, 'op_obj_append'))))
-                x = O.A.init_x(a, b);
-            else
-                x = O.B.init_x(a, b);
-            end
+            % if (~ ((my_isa(O.B, 'op_obj_image') || my_isa(O.B, 'op_obj_append'))))
+            %     x = O.A.init_x(a, b);
+            % else
+            %     x = O.B.init_x(a, b);
+            % end
 
         end
         
@@ -100,5 +102,6 @@ classdef op_obj_append < op_obj
             y = O.A.apply_adjoint(O.B.apply_adjoint(x, ind));
         end
 
+        
     end
 end

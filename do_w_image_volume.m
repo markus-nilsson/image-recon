@@ -9,8 +9,6 @@ classdef do_w_image_volume < do_w_image_vector
 
         end
 
-
-
     end
 
     methods (Static)

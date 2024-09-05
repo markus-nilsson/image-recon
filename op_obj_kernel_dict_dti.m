@@ -1,4 +1,4 @@
-classdef op_obj_kernel_dti < op_obj_kernel_dict
+classdef op_obj_kernel_dict_dti < op_obj_kernel_dict
 
     properties
         xps;
@@ -7,11 +7,17 @@ classdef op_obj_kernel_dti < op_obj_kernel_dict
     
     methods
         
-        function O = op_obj_dti(xps)
+        function O = op_obj_kernel_dict_dti(xps, di_list, dd_list, u, n_comp)
+
+            if (nargin < 2), di_list = []; end
+            if (nargin < 3), dd_list = []; end
+            if (nargin < 4), u = []; end
+            if (nargin < 5), n_comp = 16; end
             
-            di_list = linspace(0.3, 3.3, 20) * 1e-9;
-            dd_list = linspace(-0.5, 1, 16);
-            u = uvec_elstat(100, 'froeling');
+            
+            if (isempty(di_list)), di_list = linspace(0.3, 3.3, 20) * 1e-9; end
+            if (isempty(dd_list)), dd_list = linspace(-0.5, 1, 16); end
+            if (isempty(u)), u = uvec_elstat(100, 'froeling'); end
 
             S_k = zeros(xps.n, numel(di_list), numel(dd_list), size(u,1));
             for i = 1:numel(di_list)
@@ -23,8 +29,7 @@ classdef op_obj_kernel_dti < op_obj_kernel_dict
                 end
             end
 
-
-            O = O@op_obj_dict(S_k, {di_list, dd_list, u}, 16);
+            O = O@op_obj_kernel_dict(S_k, {di_list, dd_list, u}, n_comp);
             O.xps = xps;
 
         end

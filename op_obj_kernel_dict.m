@@ -23,7 +23,6 @@ classdef op_obj_kernel_dict < op_obj_kernel
             % This works better, although I think it would work worse
             if (1) % high values in COEFF (which we will estimate)
 
-
                 [COEFF, SCORE] = pca(S_k, ...
                     'centered', 'off', ...
                     'numcomponents', n_comp); % auto-select this
@@ -53,7 +52,8 @@ classdef op_obj_kernel_dict < op_obj_kernel
             % normalize the coefficients to unit length
             COEFF = COEFF ./ sqrt(sum(COEFF.^2,2));
 
-            O = O@op_obj(SCORE);
+            
+            O = O@op_obj_kernel(SCORE');
 
 
             O.CEk = COEFF;
@@ -65,22 +65,18 @@ classdef op_obj_kernel_dict < op_obj_kernel
 
         end
 
-        function x = init_x(O, c_mode)
-
-            if (nargin < 2), c_mode = 1; end
-
-            switch (c_mode)
-                case 1
-                    x = O.init_zero();
-                case 2
-                    x = repmat(mean(O.CEk,1)', [1 O.n_vox]);
-                    x  = x .* mean(data ./ (O * x),1);
-            end
-        end
-
-        function x = init_zero(O)
-            x = zeros(O.n_mp, O.n_vox);
-        end
+%         function x = init_x(O, c_mode)
+% 
+%             if (nargin < 2), c_mode = 1; end
+% 
+%             switch (c_mode)
+%                 case 1
+%                     x = O.init_zero();
+%                 case 2
+%                     x = repmat(mean(O.CEk,1)', [1 O.n_vox]);
+%                     x  = x .* mean(data ./ (O * x),1);
+%             end
+%         end
 
         function x = init_mp_with_db(O, s)
 
@@ -108,10 +104,17 @@ classdef op_obj_kernel_dict < op_obj_kernel
             Q = O.dict(); 
 
             % assumes a normalized dictionary
-            PP = Q * diag(sqrt(O.Mw)) * x;
-            [~,ind] = max(PP,[],1);
+            c_case = 2;
+            switch (c_case)
+                case 1 % code from mid 2023, does not work now
+                    PP = Q * diag(sqrt(O.Mw)) * x;
+                    [~,ind] = max(PP,[],1);
+                case 2 % new try
+                    TMP = x.w * Q';
+                    [~,ind] = max(TMP, [], 2);
+            end
 
-            d = Q(ind,:)';
+            d = x.new(Q(ind,:));
 
         end
 

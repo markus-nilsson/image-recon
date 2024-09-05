@@ -34,6 +34,25 @@ for j = 1:opts.n_iter_admm
     [x,cgr{j}] = srr_conj_grad(f, b, x, opts);
     r(j) = norm(O * x - data);
 
+    if (j > 2) && (abs(r(j)) > min(abs(r(1:(j-1)))))
+        % x = x_old;
+        % if (j > 20), break; end
+    end
+
+    if (j > 20)
+        1;
+    end
+
+
+    subplot(2,2,1);
+    srr_plot_convergence(cgr);
+
+    subplot(2,2,3);
+    plot(r);
+    
+    subplot(1,2,2);
+    msf_imagesc(x.imreshape());
+    pause(0.05);
 
 end
 

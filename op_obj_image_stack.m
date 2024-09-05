@@ -43,7 +43,7 @@ classdef op_obj_image_stack < op_obj_image
        
         function data_hr = init_x(O, a, b)
             if (nargin < 2), a = O.n_j; end
-            if (nargin < 3), b = O.n_l; end
+            if (nargin < 3), b = O.n_l; end 
             data_hr = O.O_list{1}.init_x(a, b);
         end
 
@@ -65,7 +65,16 @@ classdef op_obj_image_stack < op_obj_image
             
             data_lhs = do_c(numel(O.O_list));
             for c = 1:numel(O.O_list)
-                data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs, f_ind(c));
+
+                if (isa(data_rhs, 'do_c'))
+                    % trying this, not the same behaviour, but one we want
+                    data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs.data_obj{c}, f_ind(c));
+                else                
+                    data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs, f_ind(c));
+                end
+
+
+                % data_lhs.data_obj{c} = O.O_list{c}.apply(data_rhs, f_ind(c));
             end
         end
 

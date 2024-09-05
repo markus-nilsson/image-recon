@@ -1,8 +1,6 @@
 classdef op_obj_image < op_obj
 
     properties (Access = protected)
-        h_lhs;
-        h_rhs;
 
         d_type = 'do_w_image_vector'; % applies to this data type
 
@@ -51,27 +49,18 @@ classdef op_obj_image < op_obj
 
         end
 
-        function data_rhs = init_x(O, a, b)
-            if (nargin < 2), a = O.n_j; end
-            if (nargin < 3), b = O.n_k; end
-            h = O.h_rhs;
-            h.dim(5) = b;
-            data_rhs = do_w_image_vector(zeros(a,b), h);
-        end
-
         function data_lhs = apply(O, data_rhs, ind)
 
             if (nargin < 3), ind = []; end
 
-            if (my_isa(data_rhs, 'do_c'))
+            if (data_rhs.c_type == 2) % do_c; not pretty, redo (xxx) 
 
                 data_lhs = do_c(numel(data_rhs));
                 for c = 1:numel(data_rhs)
                     data_lhs.data_obj{c} = O.apply(data_rhs.data_obj{c}, ind);
                 end
 
-
-            elseif (my_isa(data_rhs, 'do_w'))
+            elseif (data_rhs.c_type == 1) % do_w; not pretty, redo (xxx)
 
                 if (isempty(ind)), ind = 1:size(data_rhs.w,2); end
                 data_lhs = do_w_image_vector(O.i_apply(data_rhs, ind), O.h_lhs);
@@ -91,7 +80,7 @@ classdef op_obj_image < op_obj
         function data_rhs = apply_adjoint(O, data_lhs, ind)
             if (nargin < 3), ind = []; end
             
-            if (my_isa(data_lhs, 'do_c'))
+            if (data_lhs.c_type == 2) % do_c; not pretty, redo (xxx) 
 
                 data_rhs = do_c(numel(data_lhs));
                 for c = 1:numel(data_lhs)
@@ -99,7 +88,7 @@ classdef op_obj_image < op_obj
                 end
                 
             
-            elseif (my_isa(data_lhs, 'do_w'))
+            elseif (data_lhs.c_type == 1) % do_w; not pretty, redo (xxx)
 
                 if (isempty(ind)), ind = 1:size(data_lhs.w,2); end
             
@@ -119,7 +108,6 @@ classdef op_obj_image < op_obj
         function S = get.S(O)
             S = O.aM;
         end
-
 
 
     end

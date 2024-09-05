@@ -31,7 +31,6 @@ classdef cost_admm < handle
                 C.O = op_obj_kernel(diag(ind));
             end
             
-
         end
 
 
@@ -43,9 +42,20 @@ classdef cost_admm < handle
                 C.is_initialized = 1;
             end
 
+            % Compared with Assländer's implementation, we have
+            % P = 1
+            % G = z and C.z
+            % z = C.u
+
+            % Compared with Boyd, we have
+            % y = u
+            % with A = 1, B = -1, c = 0
+
+
             C.u_old = C.u;
 
             C.u = C.u + (x - z);
+
             
             b = C.mu * (C.O * (z - C.u));
             f = @(x) C.mu * (C.O * x);
@@ -58,7 +68,10 @@ classdef cost_admm < handle
         function C = mu_update(C, x)
             % Dynamic update of mu according to Boyd et al. 2011
 
+            % This does not work at present, don't know why
+
             if (~C.do_mu_update), return; end
+
 
             mu = C.mu;
             y = C.u;
@@ -68,11 +81,13 @@ classdef cost_admm < handle
             ss = norm(mu * (y - y_old));
             if rs > 10 * ss
                 mu = 2*mu;
-                y = y/2;
+                y = y * (1/2);
             elseif ss > 10 * rs
                 mu = mu/2;
                 y = 2*y;
             end
+
+            
 
             C.u = y;
             C.mu = mu;

@@ -1,10 +1,10 @@
-classdef do_w < handle
+classdef do_w < do
 
     properties
         n_vox = 0;
         w = [];
+        xps = [];
 
-        transpose = 0;
     end
 
     methods
@@ -14,6 +14,10 @@ classdef do_w < handle
         % coefficients or contrasts
 
         function O = do_w(w)
+
+            O = O@do();
+            O.c_type = 1;
+
             O.w = double(w); % necessary for sparse operations
             O.n_vox = size(O.w, 1);
         end
@@ -67,10 +71,14 @@ classdef do_w < handle
             n = numel(O.w(:));
         end
 
+        function N = conj(O)
+            N = O.new(real(O.w) - 1i * imag(O.w));
+        end
+
         function O = add_gaussian_noise(O, noise_std)
             f = @(x) x + randn(size(x)) * noise_std;
             O.w = f(O.w);
-        end        
+        end
 
     end
 
@@ -82,11 +90,11 @@ classdef do_w < handle
             cb = my_isa(b, 'do_w');
 
             if (ca && cb)
-                q = a.new(op(a.w, b.w)); 
+                q = a.new(op(a.w, b.w));
             elseif (ca) && (isnumeric(b))
-                q = a.new(op(a.w, b)); 
+                q = a.new(op(a.w, b));
             elseif (cb) && (isnumeric(a))
-                q = b.new(op(a, b.w)); 
+                q = b.new(op(a, b.w));
             else
                 error('not implemented');
             end

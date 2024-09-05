@@ -53,9 +53,9 @@ if (1)
     for n = 1:opts.n_iter_cg
         
         Ed = E(d);
-        tmp = d .* Ed;
+        tmp = conj(d) .* Ed;
 
-        alpha = normrr/(sum(col(tmp))+eps);
+        alpha = normrr/real(sum(col(tmp))+eps);
         x = x + alpha*d;
 
         r = r - alpha*Ed;
@@ -64,7 +64,7 @@ if (1)
         normrr = normrr2;
         d = r + beta*d;
 
-        if (numel(opts.cg_display_ind) > 0)
+        if (numel(opts.cg_display_ind) > 0) && (mod(n-1, 1) == 0)
             msf_clf;
             tmp = x.imreshape();
 
@@ -99,7 +99,7 @@ if (1)
                 colorbar;
                 title(num2str(sqrt(normrr/normrr0)));
             end
-            pause(0.05);
+            pause(0.005);
 
         end
 

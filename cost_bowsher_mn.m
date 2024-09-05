@@ -1,5 +1,6 @@
-classdef cost_bowsher < cost_admm
+classdef cost_bowsher_mn < cost_admm
 
+    % implement something bowsher-like
     properties
 
         z;
@@ -9,15 +10,12 @@ classdef cost_bowsher < cost_admm
 
     methods
 
-        function C = cost_bowsher(mu, data, ind)
+        function C = cost_bowsher_mn(mu, data, ind)
             if (nargin < 2), ind = []; end
             ind = logical(ind);
             C = C@cost_admm(mu, ind);
-
-
             
             if (size(data.dim(4)) ~= 1), error('must be a 3d volue'); end
-
 
             dind = [...
                 1 0 0;
@@ -37,9 +35,17 @@ classdef cost_bowsher < cost_admm
                 -1 0 1;
                 -1 1 0;
                 0 -1 1;
-                1 0 -1]; % 18 neighbours
+                1 0 -1;
+                0 0 0]; % 18 neighbours + itself
 
-            C.S = ones(size(data.w,1), 4);
+            C.S = spalloc(size(data.w,1), size(data.w,1), size(data.w,1)*19);
+
+            load('s.mat');
+
+            C.S = q;
+            return;
+            
+
             for i = 1:data.dim(1)
                 for j = 1:data.dim(2)
                     for k = 1:data.dim(3)
@@ -60,15 +66,26 @@ classdef cost_bowsher < cost_admm
 
                         c = [i j k] + dind(mind,:);
 
+                        1;
+
                         ind  = sub2ind(data.dim(1:3), c(:,1), c(:,2), c(:,3));
 
-                        [~,ind1] = sort(abs(data.w(ind0) - data.w(ind)), 1, 'ascend');
+                        % expected standard deviation
+                        s_std = 10;
 
-                        C.S(ind0, :) = ind(ind1(1:4));
+                        wv = exp(- (data.w(ind) - data.w(ind0)).^2 / (2 * s_std.^2));
+
+                        wv = wv / sum(wv);
+
+                        % [~,ind1] = sort(abs(data.w(ind0) - data.w(ind)), 1, 'ascend');
+
+                        C.S(ind0, ind) = wv;
 
                     end
                 end
             end
+
+            1;
 
 
         end
@@ -90,21 +107,8 @@ classdef cost_bowsher < cost_admm
         function x_flt = image_filter(C, x, ind)
 
             x_flt = x.new(zeros(size(x.w)));
+            x_flt.w = C.S * x.w;
             
-            for c = find(ind)
-                for d = 1:4
-                    x_flt.w(:,c) = x_flt.w(:,c) + x.w(C.S(:,d), c) / 4;
-                end
-            end
-
-            % brush it up a little (temporary fix)
-            if (1)
-                tmp = x_flt.imreshape();
-                for c = find(ind)
-                    tmp(:,:,:,c) = medfilt3(tmp(:,:,:,c), [3 3 3]);
-                end
-                x_flt.w = reshape(tmp, size(x_flt.w));
-            end
         end
 
     end

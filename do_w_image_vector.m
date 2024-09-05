@@ -26,7 +26,7 @@ classdef do_w_image_vector < do_w
         end
 
         function O = add(O, w, l)
-            if (my_isa(w, 'do_w')), f = @(x) x.w; else, f = @(x) x; end
+            if (isnumeric(w)), f = @(x) x; else f = @(x) x.w; end
             O.w(:,l) = O.w(:,l) + f(w);
         end
 
@@ -84,6 +84,25 @@ classdef do_w_image_vector < do_w
             O.h.srow_x(4) = physc(1);
             O.h.srow_y(4) = physc(2);
             O.h.srow_z(4) = physc(3);
+
+            if (~isempty(O.xps))
+
+                if (numel(vr) ~= O.xps.n)
+                    vr_ind = (1:O.xps.n) == 0;
+                    for c = 1:numel(vr)
+                        vr_ind(vr(c)) = 1 > 0;
+                    end
+                    
+                    if (numel(vr_ind) ~= O.xps.n)
+                        error('something badly specified');
+                    end
+
+                else
+                    vr_ind = vr;
+                end
+
+                O.xps = mdm_xps_subsample(O.xps, vr_ind);
+            end
             
         end       
 
