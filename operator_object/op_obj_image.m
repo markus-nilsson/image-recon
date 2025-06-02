@@ -44,8 +44,11 @@ classdef op_obj_image < op_obj
             O.h_lhs = h_lhs;
             O.h_rhs = h_rhs;
 
-            O.aM = S;
-            O.aMT = S';
+
+            f = @(x) gpuArray(x);
+
+            O.aM = f(S);
+            O.aMT = f(S');
 
         end
 

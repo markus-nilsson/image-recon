@@ -56,13 +56,13 @@ if (1)
         tmp = conj(d) .* Ed;
 
         alpha = normrr/real(sum(col(tmp))+eps);
-        x = x + alpha*d;
+        x = x + d * alpha;
 
-        r = r - alpha*Ed;
+        r = r - Ed * alpha;
         normrr2 = norm(r) + eps;%norm();
         beta = normrr2/normrr;
         normrr = normrr2;
-        d = r + beta*d;
+        d = r + d * beta;
 
         if (numel(opts.cg_display_ind) > 0) && (mod(n-1, 1) == 0)
             msf_clf;

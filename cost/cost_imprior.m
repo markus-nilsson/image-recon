@@ -5,14 +5,16 @@ classdef cost_imprior < cost_admm
         c_type;
         z;
 
+        im;
+
     end
 
     methods
 
-        function C = cost_imprior(mu, ind)
+        function C = cost_imprior(mu, im, ind)
             if (nargin < 2), ind = []; end
-            ind = logical(ind);
             C = C@cost_admm(mu, ind);
+            C.im = im;
         end
 
         function [f,b] = do_iter(C, x)
@@ -25,18 +27,15 @@ classdef cost_imprior < cost_admm
 
         function x_flt = image_filter(C, x, ind)
 
-            tmp = x.min(ind);
-
-            if (ind(end) == 1)
-                s = -1;
-            else
-                s = 1;
+            if (all(all(x.w == 0)))
+                x_flt = x.new(x.w);
+                return;
             end
 
-            x_flt = x.new(x.w);
+            P = my_clean_prediction(C.im.imreshape(), x.imreshape(), 0);      
 
-            x_flt.w(:,  1)  = x_flt.w(:, 1)  + s * tmp.w;
-            x_flt.w(:, ind) = x_flt.w(:,ind) - tmp.w;
+            x_flt = x.new( P );
+
         end
 
 

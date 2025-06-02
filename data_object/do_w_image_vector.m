@@ -31,7 +31,7 @@ classdef do_w_image_vector < do_w
         end
 
         function I = imreshape(O)
-            I = reshape(O.w, [O.h.dim(2:4)' size(O.w,2)]);            
+            I = gather(reshape(O.w, [O.h.dim(2:4)' size(O.w,2)]));            
         end
 
         function O_new = zeros(O)

@@ -18,7 +18,7 @@ classdef do_w < do
             O = O@do();
             O.c_type = 1;
 
-            O.w = double(w); % necessary for sparse operations
+            O.w = gpuArray(double(w)); % necessary for sparse operations
             O.n_vox = size(O.w, 1);
         end
 

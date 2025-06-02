@@ -27,7 +27,7 @@ classdef op_obj_image_distort_b0h < op_obj_image
 
             O.P = op_obj_image_distort_b0(B0h, B0h, pe, n_k);
 
-            O.aM = O.U.S * O.P.S * O.U.S' / sc;
+            O.aM = (O.U.S * O.P.S * O.U.S') * (1/sc);
             O.aMT = O.aM';
 
         end
