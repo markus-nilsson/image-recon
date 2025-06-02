@@ -44,11 +44,15 @@ classdef op_obj_image < op_obj
             O.h_lhs = h_lhs;
             O.h_rhs = h_rhs;
 
+            if (canUseGPU)
+                f = @(x) gpuArray(x);
+            else
+                f = @(x) x;
+            end
 
-            f = @(x) gpuArray(x);
 
             O.aM = f(S);
-            O.aMT = f(S');
+            O.aMT = f(S'); % wasteful on memory, but let it be for now
 
         end
 
