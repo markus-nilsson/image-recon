@@ -29,10 +29,6 @@ classdef mec_params_volume_rigid < mec_params_base
 
         function d = distort(o, c, c_vol)
 
-            if (~isempty(o.prior_param))
-                c = o.prior_param.distort(c, c_vol);
-            end
-
             if (isempty(c)) || (~o.enabled)
                 d = c;
                 return; 

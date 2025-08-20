@@ -3,14 +3,15 @@ classdef mec_params_base
     properties
         x;    % parameters to fit
         data; % handle to data
+        
+        % Current and previous gradient directions
         u;
         v;
         w;
+
         enabled = false 
 
-        % use this to pre-distort
-        prior_param = [];
-
+        % Optimization related 
         opt_opts = optimoptions('lsqnonlin', ...
             'Algorithm','levenberg-marquardt', ...
             'Display','off', ...
@@ -19,6 +20,8 @@ classdef mec_params_base
             'MaxIterations',40);
 
         opt_sc = 1; % optimization scaling
+
+        opt_global = false;
     end
     
     methods
@@ -68,26 +71,27 @@ classdef mec_params_base
 
         function o = optimize(o, data_mov, data_ref, points)
 
-            for c_vol = 1:data_mov.n_vol
+            if (o.opt_global)
+                c_vols = 0;
+            else
+                c_vols = 1:data_mov.n_vol;
+            end
+
+            for c_vol = c_vols
 
                 % 1. Grab reference values and rescale obj function
-                y = points.apply_one_vol(data_ref, c_vol);
-
-                y(1) = 0; % steal this one for regularization
+                y = points.apply(data_ref, [], c_vol);
 
                 % Define objective function
                 f_obj = @(x) o.opt_obj(x, y, data_mov, points, c_vol);
 
                 % Rescale it
                 sc = o.opt_rescale(f_obj, o.get_x(c_vol));
-
-                g = @(y) cat(1, y(1), y(2:end) / sc);
-                f_obj = @(x) g(f_obj(x));
+                f_obj = @(x) f_obj(x) / sc;
 
                 % 2. Optimize
                 tic;
-                x_hat = lsqnonlin(f_obj, ...
-                    o.get_x(c_vol), [], [], o.opt_opts);
+                x_hat = lsqnonlin(f_obj, o.get_x(c_vol), [], [], o.opt_opts);
                 t = toc;
 
                 % 3. Display
@@ -99,21 +103,9 @@ classdef mec_params_base
             end
         end
 
-        % No jacobian pattern as default
-        function opt = opt_jacob_pattern(o, points)
-            opt = o.opt_opts;
-        end
-
-        function y_hat = opt_regularize(o, x)
-            y_hat = 0;
-        end
-
         function L = opt_obj(o, x, y, data_mov, points, c_vol)
 
             y_hat = points.apply(data_mov, o.update(x, c_vol), c_vol);
-
-            % Steal the first point for regularization
-            y_hat(1) = o.opt_regularize(x);
 
             L = y - y_hat;
 

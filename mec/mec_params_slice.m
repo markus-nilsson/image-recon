@@ -5,7 +5,6 @@ classdef mec_params_slice < mec_params_base
         function o = mec_params_slice(data)
             o = o@mec_params_base(data);
 
-            o.opt_opts.Display = 'iter';
             o.opt_opts.FunctionTolerance = 1e-4;
 
         end
@@ -37,10 +36,6 @@ classdef mec_params_slice < mec_params_base
 
         function c = distort(o, c, c_vol)
 
-            if (~isempty(o.prior_param))
-                c = o.prior_param.distort(c, c_vol);
-            end
-            
             if (~o.enabled), return; end
 
             p = o.get_p(c_vol);

@@ -15,6 +15,31 @@ classdef mec_points_some < mec_points
 
         end
 
+        function ind = get_ind(o)
+            ind = o.ind;
+        end
+
+        function y = apply(o, data, params, c_vol)
+
+            if (nargin < 3), params = []; end
+            if (nargin < 4), c_vol = []; end
+
+            if (isempty(c_vol) || (c_vol == 0))
+
+                for c_vol = data.n_vol:-1:1
+                    y(:,c_vol) = o.apply_one_vol(data, c_vol, params);
+                end
+
+                y = y(:);
+
+            else
+
+                y = o.apply_one_vol(data, c_vol, params);
+
+            end
+
+        end
+
         function show_mask(o, mask)
             % 
             % % Plot
@@ -40,33 +65,7 @@ classdef mec_points_some < mec_points
             % colorbar;
 
 
-        end
-
-        function ind = get_ind(o)
-            ind = o.ind;
-        end
-
-        function y = apply(o, data, params, c_vol)
-
-            if (nargin < 3), params = []; end
-            if (nargin < 4), c_vol = []; end
-
-
-            if (isempty(c_vol))
-
-                for c_vol = data.n_vol:-1:1
-                    y(:,c_vol) = o.apply_one_vol(data, c_vol, params);
-                end
-
-                y = y(:);
-
-            else
-
-                y = o.apply_one_vol(data, c_vol, params);
-
-            end
-
-        end
+        end        
 
     end
 

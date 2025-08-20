@@ -12,6 +12,8 @@ classdef mec_params_global_orders < mec_params_base
 
             o = o.reset();
 
+            o.opt_global = 1;
+
             o.opt_opts.Display = 'iter';
             o.opt_opts.TypicalX = ones(size(o.get_x(1)));
             
@@ -70,11 +72,11 @@ classdef mec_params_global_orders < mec_params_base
 
         function [d,i] = distort(o, c, c_vol)
 
-            if (~isempty(o.prior_param))
-                c = o.prior_param.distort(c, c_vol);
-            end
-
-            d = c;
+            % Transfer all important variables
+            d.x = c.x;
+            d.y = c.y;
+            d.z = c.z;
+            d.z_ind = c.z_ind;
 
             if (~o.enabled), return; end
            
@@ -150,31 +152,6 @@ classdef mec_params_global_orders < mec_params_base
             if (o.ec_order == 3), return; end            
             
         end
-
-        function o = optimize(o, data_mov, data_ref, points)
-
-            % 1. Grab reference values 
-            y = points.apply(data_ref);
-
-            % Define objective function
-            f_obj = @(x) o.opt_obj(x, y, data_mov, points, []);
-
-            % Rescale it
-            sc = o.opt_rescale(f_obj, o.get_x());
-            f_obj = @(x) f_obj(x) / sc;
-
-            % 2. Optimize
-            tic;
-            x_hat = lsqnonlin(f_obj, o.get_x(), [], [], o.opt_opts);
-            t = toc;
-
-            % 3. Display
-            o.opt_disp(f_obj, x_hat, t);
-
-            % 4. Store
-            o = o.update(x_hat);
-
-        end        
 
         function plot(o)
 
