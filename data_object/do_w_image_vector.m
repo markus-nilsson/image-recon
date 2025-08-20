@@ -1,14 +1,15 @@
-classdef do_w_image_vector < do_w
+classdef do_w_image_vector < do_w 
 
     properties (GetAccess = public, SetAccess = protected)
-        h;
+        h; % nifti header       
     end
 
     methods
 
-        function O = do_w_image_vector(w, h)
+        function O = do_w_image_vector(w, h, xps)
+            if (nargin < 3), xps = []; end
             assert(size(w,1) == prod(h.dim(2:4)), 'wrong size');
-            O = O@do_w(w);            
+            O = O@do_w(w, xps);            
             h.dim(5) = size(w,2);
             O.h = h;            
         end
@@ -23,6 +24,7 @@ classdef do_w_image_vector < do_w
             h = O.h;
             h.dim(5) = size(w,2);
             O_new = do_w_image_vector(w, h);
+            O_new.xps = O.xps; % fix this
         end
 
         function O = add(O, w, l)
@@ -30,8 +32,13 @@ classdef do_w_image_vector < do_w
             O.w(:,l) = O.w(:,l) + f(w);
         end
 
-        function I = imreshape(O)
-            I = gather(reshape(O.w, [O.h.dim(2:4)' size(O.w,2)]));            
+        function I = imreshape(O, c_vol)
+            arguments
+                O
+                c_vol = 1:size(O.w,2)
+            end
+
+            I = gather(reshape(O.w(:,c_vol), [O.h.dim(2:4)' numel(c_vol)]));            
         end
 
         function O_new = zeros(O)
@@ -59,23 +66,39 @@ classdef do_w_image_vector < do_w
                 d = d(ind);
             end
         end
+
+        function O = trim_copy(O, ir, jr, kr, vr)
+            if (nargin < 5), vr = []; end
+            O = trim(O, ir, jr, kr, vr, @(w) do_w_image_vector(w, O.h));
+        end
         
 
-        function O = trim(O, ir, jr, kr, vr)
+        function O = trim(O, ir, jr, kr, vr, f)
 
-            if (nargin < 2) || (isempty(ir)), ir = 1:O.h.dim(2); end
-            if (nargin < 3) || (isempty(jr)), jr = 1:O.h.dim(3); end
-            if (nargin < 4) || (isempty(kr)), kr = 1:O.h.dim(4); end
-            if (nargin < 5) || (isempty(vr)), vr = 1:O.h.dim(5); end
+            % keep track of input info, to accelerate trimming
+            ii = 'yyyy'; 
 
-            I = O.imreshape();
-            I = I(ir, jr, kr, vr);
-            O.w = reshape(I, [prod(size(I,1,2,3)) size(I,4)]);
-            O.n_vox = size(O.w, 1);
+            if (nargin < 2) || (isempty(ir)), ir = 1:O.h.dim(2); ii(1) = 'n'; end
+            if (nargin < 3) || (isempty(jr)), jr = 1:O.h.dim(3); ii(2) = 'n'; end
+            if (nargin < 4) || (isempty(kr)), kr = 1:O.h.dim(4); ii(3) = 'n'; end
+            if (nargin < 5) || (isempty(vr)), vr = 1:O.h.dim(5); ii(4) = 'n'; end
+            if (nargin < 6), f = @(w) O.set_w(w); end
 
-            O.h.dim(2:5) = size(I, 1, 2, 3, 4);
+            xps = O.xps;
 
-            % adjust offsets
+            % Trim efficiently
+            switch (ii) % implement [0 0 1 1] later
+                case 'nnny'
+                    O = f(O.w(:,vr));
+
+                otherwise
+                    I = O.imreshape();
+                    I = I(ir, jr, kr, vr);
+                    O = f(reshape(I, [prod(size(I,1,2,3)) size(I,4)]));
+
+            end
+
+            % Adjust info and header including offsets
             ind = [min(ir)-1 min(jr)-1 min(kr)-1 1]';
             cm = [O.h.srow_x'; O.h.srow_y'; O.h.srow_z';  0 0 0 1];
             physc = cm * ind;
@@ -84,16 +107,18 @@ classdef do_w_image_vector < do_w
             O.h.srow_x(4) = physc(1);
             O.h.srow_y(4) = physc(2);
             O.h.srow_z(4) = physc(3);
+            O.h.dim(2:5) = [numel(ir) numel(jr) numel(kr) numel(vr)];
+            
 
-            if (~isempty(O.xps))
+            if (~isempty(xps))
 
-                if (numel(vr) ~= O.xps.n)
-                    vr_ind = (1:O.xps.n) == 0;
+                if (numel(vr) ~= xps.n)
+                    vr_ind = (1:xps.n) == 0;
                     for c = 1:numel(vr)
                         vr_ind(vr(c)) = 1 > 0;
                     end
                     
-                    if (numel(vr_ind) ~= O.xps.n)
+                    if (numel(vr_ind) ~= xps.n)
                         error('something badly specified');
                     end
 
@@ -101,7 +126,7 @@ classdef do_w_image_vector < do_w
                     vr_ind = vr;
                 end
 
-                O.xps = mdm_xps_subsample(O.xps, vr_ind);
+                O.xps = mdm_xps_subsample(xps, vr_ind);
             end
             
         end       
@@ -129,6 +154,85 @@ classdef do_w_image_vector < do_w
             w = reshape(O.w(ind, l), numel(ir), numel(jr), numel(kr));
 
         end
+
+        function O = recast(O, target)
+
+            O.w = cast(O.w, 'like', target.w);
+            O.h.datatype = target.h.datatype;
+            
+        end
+
+        function O = rescale(O, target)
+
+            O.w = O.w / target.h.scl_slope * O.h.scl_slope;
+            O.h.scl_slope = target.h.scl_slope;
+
+        end
+
+
+        function nii_fn = nii_write(obj, nii_fn, type)
+
+            if (nargin < 3), type = []; end % cast
+            if (isempty(type)), type = 'undefined'; end
+
+            this_h = obj.h;
+            this_I = obj.imreshape();
+
+            switch (type)
+
+                case 'single'
+                    this_h.datatype = 16;
+                    this_I = single(this_I);
+
+                case 'undefined'
+                    % do nothing
+
+                otherwise
+                    error('not implemented');
+            end
+
+            mdm_nii_write(this_I, nii_fn, this_h);
+
+        end
+
+        function show(O, c_dim, k, c_vol)
+
+            arguments
+                O
+                c_dim = []
+                k = []
+                c_vol = []
+            end
+
+            if (isempty(c_vol)), c_vol = 1; end
+
+            msf_imagesc(O.imreshape(c_vol), c_dim, k);
+            % caxis([0 1600]);
+
+        end
+
+        function play(O, c_dim, k, n_rep, cscl)
+        % function play(O, c_dim, k, n_rep, cscl)
+
+            arguments
+                O
+                c_dim = []
+                k = []
+                n_rep = 2
+                cscl = [];
+            end
+
+            for c_rep = 1:n_rep
+                for c_vol = 1:size(O.w,2)
+                    O.show(c_dim, k, c_vol);
+                    title(num2str(c_vol));
+                    if (~isempty(cscl)), caxis(cscl); end
+                    pause(0.1);
+                end
+            end
+
+        end
+
 
     end
 

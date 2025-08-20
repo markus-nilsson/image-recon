@@ -1,11 +1,16 @@
 classdef do_w < do
 
     properties
-        n_vox = 0;
         w = [];
         xps = [];
 
     end
+
+    properties (Dependent)
+        n_vox;
+        n_vol;
+    end
+
 
     methods
 
@@ -13,10 +18,13 @@ classdef do_w < do
         % where i of the numbe of voxels and l the number of model
         % coefficients or contrasts
 
-        function O = do_w(w)
+        function O = do_w(w, xps)
+
+            if (nargin < 2), xps = []; end
 
             O = O@do();
             O.c_type = 1;
+            O.xps = xps;
 
             if (canUseGPU)
                 O.w = gpuArray(single(w)); 
@@ -24,9 +32,22 @@ classdef do_w < do
                 O.w = double(w); % necessary for sparse operations
             end
             
-            O.n_vox = size(O.w, 1);
         end
 
+        function n_vox = get.n_vox(O)
+            n_vox = size(O.w, 1);
+        end
+
+        function n_vol = get.n_vol(O)
+            n_vol = size(O.w,2);
+        end
+    
+        function O = set_w(O,w)
+            O.w = w;
+        end
+
+
+        % xxx: these functions need some love, to update headers properly
         function O_new = new(O, w)
             O_new = do_w(w);
             O_new.transpose = O.transpose;
@@ -34,6 +55,7 @@ classdef do_w < do
 
         function O_new = copy(O)
             O_new = O.new(O.w);
+            O_new.xps = O.xps;
         end
 
         function O_new = subsample(O, ind)
