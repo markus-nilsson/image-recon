@@ -62,6 +62,8 @@ classdef mec_params_volume_rigid < mec_params_base
 
             t_str = {'dx', 'dy', 'dz', 'rx', 'ry', 'rz'};
             
+            msf_clf;
+
             yl = [1 2 1  3 3 3];
             for c = 1:6
 

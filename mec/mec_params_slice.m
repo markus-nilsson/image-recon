@@ -86,47 +86,49 @@ classdef mec_params_slice < mec_params_base
                 xlabel('Slice');
                 xlim([0 o.data.dim(3)+1]);  
 
-                
+
                 % regression
-                
-                X = [ones(o.data.n_vol, 1)';
-                    o.u(:,1)';
-                    o.u(:,2)';
-                    o.u(:,3)';
-                    o.v(:,1)';
-                    o.v(:,2)';
-                    o.v(:,3)';
-                    ];
+                try
+                    X = [ones(o.data.n_vol, 1)';
+                        o.u(:,1)';
+                        o.u(:,2)';
+                        o.u(:,3)';
+                        o.v(:,1)';
+                        o.v(:,2)';
+                        o.v(:,3)';
+                        ];
 
-                for c_slice = 1:size(p,2)
-                    tmp = squeeze(p(c_param, c_slice, :));
-                    beta(:, c_slice) = tmp' * X' * inv(X * X');
+                    for c_slice = 1:size(p,2)
+                        tmp = squeeze(p(c_param, c_slice, :));
+                        beta(:, c_slice) = tmp' * X' * inv(X * X');
 
-                    tmp_hat = beta(:,c_slice)' * X;
+                        tmp_hat = beta(:,c_slice)' * X;
 
-                    SS_res = sum((tmp(:) - tmp_hat(:)).^2);              % residual sum of squares
-                    SS_tot = sum((tmp - mean(tmp)).^2);            % total sum of squares
-                    R2(c_slice) = 1 - SS_res/SS_tot;
-                end
-
-                if (1)
-                    subplot(3, 3, 6 + c_param)
-                    plot(R2);
-                    ylim([0 1]);
-                    xlim([0 o.data.dim(3)+1]);
-
-                    ylabel('R2 of g(n, n-1)');
-                else
-
-                    x = 1:size(beta, 2);
-                    for c = 1:3
-                        subplot(3, 9, 18 + c + (c_param-1) * 3);
-                        ind = 1:1:(numel(x));
-                        plot(x(ind), beta(c+1, ind), x(ind), beta(c+4, ind), 'linewidth', 1);
-
-
-                        axis off
+                        SS_res = sum((tmp(:) - tmp_hat(:)).^2);              % residual sum of squares
+                        SS_tot = sum((tmp - mean(tmp)).^2);            % total sum of squares
+                        R2(c_slice) = 1 - SS_res/SS_tot;
                     end
+
+                    if (1)
+                        subplot(3, 3, 6 + c_param)
+                        plot(R2);
+                        ylim([0 1]);
+                        xlim([0 o.data.dim(3)+1]);
+
+                        ylabel('R2 of g(n, n-1)');
+                    else
+
+                        x = 1:size(beta, 2);
+                        for c = 1:3
+                            subplot(3, 9, 18 + c + (c_param-1) * 3);
+                            ind = 1:1:(numel(x));
+                            plot(x(ind), beta(c+1, ind), x(ind), beta(c+4, ind), 'linewidth', 1);
+
+
+                            axis off
+                        end
+                    end
+                catch me
                 end
 
             end
