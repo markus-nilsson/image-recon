@@ -164,7 +164,7 @@ classdef mec_params_global_orders < mec_params_base
             % 
             plot_shift = [1  8 9 10  15:20];
 
-            yscl = [1   0.02 0.02 0.02  1e-3 1e-3 1e-3  1e-3 1e-3 1e-3 ];
+            yscl = [1   0.04 0.04 0.04  1e-3 1e-3 1e-3  1e-3 1e-3 1e-3 ];
 
             t_str = {'dy', ...
                 'shear', 'scale', 'trans', ...
